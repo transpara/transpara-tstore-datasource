@@ -173,9 +173,3 @@ func (d *Datasource) CallResource(ctx context.Context, req *backend.CallResource
 		Body: body,
 	})
 }
-
-// QueryData is implemented in query.go.
-func (d *Datasource) QueryData(ctx context.Context, req *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
-	// Placeholder -- will be replaced in Task 7.
-	return backend.NewQueryDataResponse(), nil
-}
