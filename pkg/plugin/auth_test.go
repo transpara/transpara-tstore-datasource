@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -45,12 +46,12 @@ func TestFetchToken_Success(t *testing.T) {
 }
 
 func TestTokenCache_RefreshesOnExpiry(t *testing.T) {
-	callCount := 0
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
+		n := callCount.Add(1)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"access_token": "token-" + string(rune('0'+callCount)),
+			"access_token": "token-" + string(rune('0'+n)),
 			"expires_in":   1, // 1 second — expires immediately for test
 		})
 	}))
@@ -75,7 +76,7 @@ func TestTokenCache_RefreshesOnExpiry(t *testing.T) {
 	if tok1 == tok2 {
 		t.Error("expected different tokens after cache expiry")
 	}
-	if callCount != 2 {
-		t.Errorf("expected 2 token fetches, got %d", callCount)
+	if callCount.Load() != 2 {
+		t.Errorf("expected 2 token fetches, got %d", callCount.Load())
 	}
 }
