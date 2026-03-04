@@ -1,45 +1,129 @@
-import React, { ChangeEvent } from 'react';
-import { InlineField, Input, Stack } from '@grafana/ui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { QueryEditorProps } from '@grafana/data';
+import { InlineField, Select, MultiSelect, TextArea, RadioButtonGroup, Input } from '@grafana/ui';
 import { DataSource } from '../datasource';
-import { MyDataSourceOptions, MyQuery } from '../types';
+import { DEFAULT_QUERY, MyDataSourceOptions, MyQuery } from '../types';
 
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
-export function QueryEditor({ query, onChange, onRunQuery }: Props) {
-  const onQueryTextChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...query, queryText: event.target.value });
-  };
+const AGG_OPTIONS = [
+  { label: 'avg', value: 'avg' },
+  { label: 'raw', value: 'raw' },
+  { label: 'min', value: 'min' },
+  { label: 'max', value: 'max' },
+  { label: 'sum', value: 'sum' },
+  { label: 'count', value: 'count' },
+  { label: 'median', value: 'median' },
+  { label: 'twavg', value: 'twavg' },
+];
 
-  const onConstantChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...query, constant: parseFloat(event.target.value) });
-    // executes the query
-    onRunQuery();
-  };
+const MODE_OPTIONS = [
+  { label: 'Visual', value: 'visual' as const },
+  { label: 'Raw', value: 'raw' as const },
+];
 
-  const { queryText, constant } = query;
+export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) {
+  const q = { ...DEFAULT_QUERY, ...query };
+
+  const [datasets, setDatasets] = useState<Array<{ label: string; value: string }>>([]);
+  const [lookupOptions, setLookupOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [selectedDataset, setSelectedDataset] = useState<string>('');
+
+  // Load datasets on mount
+  useEffect(() => {
+    datasource.getDatasets().then((ds) => {
+      setDatasets(ds.map((d) => ({ label: d, value: d })));
+    });
+  }, [datasource]);
+
+  // Load lookups when dataset changes
+  useEffect(() => {
+    if (!selectedDataset) {
+      setLookupOptions([]);
+      return;
+    }
+    datasource.getLookups(selectedDataset).then((ls) => {
+      setLookupOptions(ls.map((l) => ({ label: l, value: l })));
+    });
+  }, [datasource, selectedDataset]);
+
+  const onModeChange = useCallback(
+    (mode: 'visual' | 'raw') => {
+      if (mode === 'raw') {
+        const rawBody = JSON.stringify({ lookups: q.lookups ?? [] }, null, 2);
+        onChange({ ...q, queryType: 'raw', rawJson: rawBody });
+      } else {
+        onChange({ ...q, queryType: 'visual' });
+      }
+    },
+    [q, onChange]
+  );
+
+  if (q.queryType === 'raw') {
+    return (
+      <div>
+        <InlineField label="Mode" labelWidth={10}>
+          <RadioButtonGroup options={MODE_OPTIONS} value={q.queryType} onChange={onModeChange} />
+        </InlineField>
+        <InlineField label="Query JSON" labelWidth={10} grow>
+          <TextArea
+            rows={8}
+            value={q.rawJson ?? ''}
+            onChange={(e) => onChange({ ...q, rawJson: e.currentTarget.value })}
+            onBlur={onRunQuery}
+            placeholder={'{"lookups": ["dataset|filter|avg|5m"]}'}
+          />
+        </InlineField>
+      </div>
+    );
+  }
 
   return (
-    <Stack gap={0}>
-      <InlineField label="Constant">
-        <Input
-          id="query-editor-constant"
-          onChange={onConstantChange}
-          value={constant}
-          width={8}
-          type="number"
-          step="0.1"
+    <div>
+      <InlineField label="Mode" labelWidth={10}>
+        <RadioButtonGroup options={MODE_OPTIONS} value={q.queryType ?? 'visual'} onChange={onModeChange} />
+      </InlineField>
+
+      <InlineField label="Dataset" labelWidth={12}>
+        <Select
+          width={30}
+          options={datasets}
+          value={selectedDataset || null}
+          onChange={(v) => setSelectedDataset(v.value ?? '')}
+          placeholder="Select dataset..."
         />
       </InlineField>
-      <InlineField label="Query Text" labelWidth={16} tooltip="Not used yet">
-        <Input
-          id="query-editor-query-text"
-          onChange={onQueryTextChange}
-          value={queryText || ''}
-          required
-          placeholder="Enter a query"
+
+      <InlineField label="Lookups" labelWidth={12}>
+        <MultiSelect
+          width={60}
+          options={lookupOptions}
+          value={q.lookups ?? []}
+          onChange={(vals) => onChange({ ...q, lookups: vals.map((v) => v.value as string) })}
+          onBlur={onRunQuery}
+          placeholder="Select lookups..."
+          isDisabled={!selectedDataset}
         />
       </InlineField>
-    </Stack>
+
+      <InlineField label="Aggregation" labelWidth={12}>
+        <Select
+          width={16}
+          options={AGG_OPTIONS}
+          value={q.aggType ?? 'avg'}
+          onChange={(v) => onChange({ ...q, aggType: v.value ?? 'avg' })}
+        />
+      </InlineField>
+
+      <InlineField label="Interval" labelWidth={12} tooltip="e.g. 5m, 1h. Leave empty to use Grafana's $__interval.">
+        <Input
+          width={12}
+          value={q.aggInt ?? ''}
+          onChange={(e) => onChange({ ...q, aggInt: e.currentTarget.value })}
+          onBlur={onRunQuery}
+          placeholder="auto"
+        />
+      </InlineField>
+    </div>
   );
 }
