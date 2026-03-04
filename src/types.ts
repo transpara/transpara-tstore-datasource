@@ -17,7 +17,7 @@ export const DEFAULT_QUERY: Partial<MyQuery> = {
   aggType: 'avg',
   aggInt: '',
   tz: 'UTC',
-  rawJson: JSON.stringify({ lookups: [] }, null, 2),
+  rawJson: JSON.stringify([], null, 2),
 };
 
 export interface MyDataSourceOptions extends DataSourceJsonData {

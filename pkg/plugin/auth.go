@@ -70,6 +70,14 @@ func NewTokenCache() *TokenCache {
 	return &TokenCache{}
 }
 
+// Reset clears the cached token, forcing the next GetToken call to fetch a new one.
+func (c *TokenCache) Reset() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.token = ""
+	c.expiresAt = time.Time{}
+}
+
 // GetToken returns the cached token, fetching a new one if expired or absent.
 func (c *TokenCache) GetToken(ctx context.Context, settings AuthSettings, clientSecret string) (string, error) {
 	c.mu.Lock()

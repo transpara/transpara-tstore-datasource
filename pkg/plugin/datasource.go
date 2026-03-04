@@ -75,12 +75,15 @@ func (d *Datasource) doRequest(ctx context.Context, req *http.Request) (*http.Re
 
 	if resp.StatusCode == http.StatusUnauthorized {
 		resp.Body.Close()
-		d.tokenCache = NewTokenCache()
+		d.tokenCache.Reset()
 		token, err = d.tokenCache.GetToken(ctx, d.authSettings(), d.clientSecret)
 		if err != nil {
 			return nil, fmt.Errorf("refreshing token: %w", err)
 		}
 		req2 := req.Clone(ctx)
+		if req.GetBody != nil {
+			req2.Body, _ = req.GetBody()
+		}
 		req2.Header.Set("Authorization", "Bearer "+token)
 		return d.httpClient.Do(req2)
 	}
@@ -124,7 +127,7 @@ func (d *Datasource) CallResource(ctx context.Context, req *backend.CallResource
 		targetURL = d.settings.URL + "/api/v1/dataset"
 	case strings.HasPrefix(req.Path, "lookups"):
 		params := url.Values{}
-		parsed, err := url.Parse("/?" + req.URL)
+		parsed, err := url.Parse(req.URL)
 		if err == nil {
 			if ds := parsed.Query().Get("dataset"); ds != "" {
 				params.Set("filter", ds)

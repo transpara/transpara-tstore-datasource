@@ -50,7 +50,7 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
   const onModeChange = useCallback(
     (mode: 'visual' | 'raw') => {
       if (mode === 'raw') {
-        const rawBody = JSON.stringify({ lookups: query.lookups ?? [] }, null, 2);
+        const rawBody = JSON.stringify(query.lookups ?? [], null, 2);
         onChange({ ...DEFAULT_QUERY, ...query, queryType: 'raw', rawJson: rawBody });
       } else {
         onChange({ ...DEFAULT_QUERY, ...query, queryType: 'visual' });
@@ -71,7 +71,7 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
             value={q.rawJson ?? ''}
             onChange={(e) => onChange({ ...q, rawJson: e.currentTarget.value })}
             onBlur={onRunQuery}
-            placeholder={'{"lookups": ["dataset|filter|avg|5m"]}'}
+            placeholder={'["dataset|filter|avg|5m"]'}
           />
         </InlineField>
       </div>

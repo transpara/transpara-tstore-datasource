@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -116,6 +117,50 @@ func TestCallResource_Datasets(t *testing.T) {
 	json.Unmarshal(captured.Body, &result)
 	if len(result) != 2 || result[0] != "plant-a" {
 		t.Errorf("unexpected datasets: %v", result)
+	}
+}
+
+func TestCallResource_Lookups(t *testing.T) {
+	keycloak := makeKeycloakMock(t)
+	defer keycloak.Close()
+
+	var capturedFilter string
+	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/v1/lookups") {
+			capturedFilter = r.URL.Query().Get("filter")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"results":     []string{"plant-a|sensor_id=123"},
+				"total_count": 1,
+			})
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer tstore.Close()
+
+	ds, err := makeTestPlugin(tstore.URL, keycloak.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var captured *backend.CallResourceResponse
+	sender := &mockSender{capture: func(r *backend.CallResourceResponse) { captured = r }}
+
+	err = ds.CallResource(context.Background(), &backend.CallResourceRequest{
+		Path: "lookups",
+		URL:  tstore.URL + "/resources/lookups?dataset=plant-a",
+	}, sender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if capturedFilter != "plant-a" {
+		t.Errorf("expected filter=plant-a, got %q", capturedFilter)
+	}
+	var result []string
+	json.Unmarshal(captured.Body, &result)
+	if len(result) != 1 || result[0] != "plant-a|sensor_id=123" {
+		t.Errorf("unexpected result: %v", result)
 	}
 }
 

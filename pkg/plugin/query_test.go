@@ -84,6 +84,13 @@ func TestQueryData_RawMode(t *testing.T) {
 	called := false
 	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		called = true
+		var body []string
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("expected bare array body, got decode error: %v", err)
+		}
+		if len(body) == 0 || body[0] != "plant-a|sensor_id=123" {
+			t.Errorf("unexpected body: %v", body)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
@@ -94,7 +101,7 @@ func TestQueryData_RawMode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rawBody := `{"lookups":["plant-a|sensor_id=123"]}`
+	rawBody := `["plant-a|sensor_id=123"]`
 	queryJSON, _ := json.Marshal(map[string]interface{}{
 		"queryType": "raw",
 		"rawJson":   rawBody,
@@ -136,7 +143,7 @@ func TestQueryData_RawMode_UsesQueryTz(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rawBody := `{"lookups":["plant-a|sensor_id=123"]}`
+	rawBody := `["plant-a|sensor_id=123"]`
 	queryJSON, _ := json.Marshal(map[string]interface{}{
 		"queryType": "raw",
 		"rawJson":   rawBody,
