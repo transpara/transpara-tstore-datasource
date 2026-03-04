@@ -50,13 +50,13 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
   const onModeChange = useCallback(
     (mode: 'visual' | 'raw') => {
       if (mode === 'raw') {
-        const rawBody = JSON.stringify({ lookups: q.lookups ?? [] }, null, 2);
-        onChange({ ...q, queryType: 'raw', rawJson: rawBody });
+        const rawBody = JSON.stringify({ lookups: query.lookups ?? [] }, null, 2);
+        onChange({ ...DEFAULT_QUERY, ...query, queryType: 'raw', rawJson: rawBody });
       } else {
-        onChange({ ...q, queryType: 'visual' });
+        onChange({ ...DEFAULT_QUERY, ...query, queryType: 'visual' });
       }
     },
-    [q, onChange]
+    [query, onChange]
   );
 
   if (q.queryType === 'raw') {

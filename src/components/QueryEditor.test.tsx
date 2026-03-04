@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryEditor } from './QueryEditor';
 import { DEFAULT_QUERY } from '../types';
 
@@ -20,24 +20,24 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-test('renders visual mode by default', () => {
+test('renders visual mode by default', async () => {
   render(<QueryEditor {...defaultProps} />);
-  // The label "Dataset" appears in the InlineField label; use getAllByText to handle
-  // the placeholder text "Select dataset..." also matching /Dataset/i
-  expect(screen.getAllByText(/Dataset/i)[0]).toBeInTheDocument();
+  await waitFor(() => {
+    expect(screen.getAllByText(/Dataset/i)[0]).toBeInTheDocument();
+  });
 });
 
-test('toggle switches to raw mode', () => {
+test('toggle switches to raw mode', async () => {
   render(<QueryEditor {...defaultProps} />);
-  // Find and click the Raw radio button
-  const rawButton = screen.getByText(/Raw/i);
+  await waitFor(() => screen.getAllByText(/Raw/i)[0]);
+  const rawButton = screen.getAllByText(/Raw/i)[0];
   fireEvent.click(rawButton);
   expect(defaultProps.onChange).toHaveBeenCalledWith(
     expect.objectContaining({ queryType: 'raw' })
   );
 });
 
-test('visual to raw toggle serializes lookups to rawJson', () => {
+test('visual to raw toggle serializes lookups to rawJson', async () => {
   const onChange = jest.fn();
   render(
     <QueryEditor
@@ -51,7 +51,8 @@ test('visual to raw toggle serializes lookups to rawJson', () => {
       } as any}
     />
   );
-  fireEvent.click(screen.getByText(/Raw/i));
+  await waitFor(() => screen.getAllByText(/Raw/i)[0]);
+  fireEvent.click(screen.getAllByText(/Raw/i)[0]);
   expect(onChange).toHaveBeenCalledWith(
     expect.objectContaining({
       queryType: 'raw',
