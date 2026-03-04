@@ -9,5 +9,4 @@ datasources:
       tokenUrl: 'https://keycloak.internal/realms/transpara/protocol/openid-connect/token'
       clientId: 'tstore-grafana'
     secureJsonData:
-      # IMPORTANT: Do not commit real secrets here. Use environment variables or Grafana provisioning secrets.
-      clientSecret: 'changeme'
+      clientSecret: ${GF_DATASOURCE_CLIENT_SECRET}

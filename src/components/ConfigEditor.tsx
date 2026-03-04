@@ -13,7 +13,7 @@ export function ConfigEditor({ options, onOptionsChange }: Props) {
   };
 
   const onSecretChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onOptionsChange({ ...options, secureJsonData: { clientSecret: e.target.value } });
+    onOptionsChange({ ...options, secureJsonData: { ...secureJsonData, clientSecret: e.target.value } });
   };
 
   const onSecretReset = () => {
