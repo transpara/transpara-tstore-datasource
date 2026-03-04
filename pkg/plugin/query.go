@@ -53,9 +53,10 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 
 	if qm.QueryType == "raw" {
 		reqBody = []byte(qm.RawJson)
-		queryParams = fmt.Sprintf("start_time=%s&end_time=%s&tz=UTC",
+		queryParams = fmt.Sprintf("start_time=%s&end_time=%s&tz=%s",
 			q.TimeRange.From.UTC().Format(time.RFC3339),
 			q.TimeRange.To.UTC().Format(time.RFC3339),
+			qm.Tz,
 		)
 	} else {
 		body, err := json.Marshal(qm.Lookups)

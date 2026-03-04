@@ -118,3 +118,46 @@ func TestQueryData_RawMode(t *testing.T) {
 		t.Error("expected tstore to be called")
 	}
 }
+
+func TestQueryData_RawMode_UsesQueryTz(t *testing.T) {
+	keycloak := makeKeycloakMock(t)
+	defer keycloak.Close()
+
+	var capturedTz string
+	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedTz = r.URL.Query().Get("tz")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{})
+	}))
+	defer tstore.Close()
+
+	ds, err := makeTestPlugin(tstore.URL, keycloak.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rawBody := `{"lookups":["plant-a|sensor_id=123"]}`
+	queryJSON, _ := json.Marshal(map[string]interface{}{
+		"queryType": "raw",
+		"rawJson":   rawBody,
+		"tz":        "America/New_York",
+	})
+
+	req := &backend.QueryDataRequest{
+		Queries: []backend.DataQuery{
+			{
+				RefID:     "A",
+				JSON:      queryJSON,
+				TimeRange: backend.TimeRange{From: time.Now().Add(-1 * time.Hour), To: time.Now()},
+			},
+		},
+	}
+
+	_, err = ds.QueryData(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if capturedTz != "America/New_York" {
+		t.Errorf("expected tz=America/New_York, got %s", capturedTz)
+	}
+}
