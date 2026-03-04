@@ -72,3 +72,28 @@ test('onSecretReset sets secureJsonFields.clientSecret to false', () => {
     })
   );
 });
+
+test('onSecretChange preserves existing secureJsonData fields', () => {
+  const onChange = jest.fn();
+  render(
+    <ConfigEditor
+      {...defaultProps}
+      onOptionsChange={onChange}
+      options={{
+        ...defaultOptions,
+        secureJsonData: { clientSecret: '', someOtherField: 'preserved' },
+      } as any}
+    />
+  );
+  fireEvent.change(document.querySelector('input[type="password"]')!, {
+    target: { value: 'new-secret' },
+  });
+  expect(onChange).toHaveBeenCalledWith(
+    expect.objectContaining({
+      secureJsonData: expect.objectContaining({
+        clientSecret: 'new-secret',
+        someOtherField: 'preserved',
+      }),
+    })
+  );
+});
