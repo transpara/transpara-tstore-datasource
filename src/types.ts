@@ -1,34 +1,31 @@
-import { DataSourceJsonData } from '@grafana/data';
-import { DataQuery } from '@grafana/schema';
+import { DataQuery, DataSourceJsonData } from '@grafana/schema';
 
 export interface MyQuery extends DataQuery {
-  queryText?: string;
-  constant: number;
+  queryType: 'visual' | 'raw';
+  // Visual mode
+  lookups: string[];   // full lookup strings: "dataset|filter" or "dataset|filter|agg_type|agg_int"
+  aggType: string;     // global agg_type override (empty = use per-lookup agg)
+  aggInt: string;      // global agg_int override (empty = use per-lookup agg)
+  tz: string;
+  // Raw mode
+  rawJson: string;     // JSON body sent directly to /api/v1/read/historical-data
 }
 
 export const DEFAULT_QUERY: Partial<MyQuery> = {
-  constant: 6.5,
+  queryType: 'visual',
+  lookups: [],
+  aggType: 'avg',
+  aggInt: '',
+  tz: 'UTC',
+  rawJson: JSON.stringify({ lookups: [] }, null, 2),
 };
 
-export interface DataPoint {
-  Time: number;
-  Value: number;
-}
-
-export interface DataSourceResponse {
-  datapoints: DataPoint[];
-}
-
-/**
- * These are options configured for each DataSource instance
- */
 export interface MyDataSourceOptions extends DataSourceJsonData {
-  path?: string;
+  url: string;
+  tokenUrl: string;
+  clientId: string;
 }
 
-/**
- * Value that is used in the backend, but never sent over HTTP to the frontend
- */
 export interface MySecureJsonData {
-  apiKey?: string;
+  clientSecret?: string;
 }
