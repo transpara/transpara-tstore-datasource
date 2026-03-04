@@ -3,67 +3,63 @@ import { InlineField, Input, SecretInput } from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps } from '@grafana/data';
 import { MyDataSourceOptions, MySecureJsonData } from '../types';
 
-interface Props extends DataSourcePluginOptionsEditorProps<MyDataSourceOptions, MySecureJsonData> {}
+type Props = DataSourcePluginOptionsEditorProps<MyDataSourceOptions, MySecureJsonData>;
 
-export function ConfigEditor(props: Props) {
-  const { onOptionsChange, options } = props;
+export function ConfigEditor({ options, onOptionsChange }: Props) {
   const { jsonData, secureJsonFields, secureJsonData } = options;
 
-  const onPathChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onOptionsChange({
-      ...options,
-      jsonData: {
-        ...jsonData,
-        path: event.target.value,
-      },
-    });
+  const onJsonDataChange = (key: keyof MyDataSourceOptions) => (e: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({ ...options, jsonData: { ...jsonData, [key]: e.target.value } });
   };
 
-  // Secure field (only sent to the backend)
-  const onAPIKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onOptionsChange({
-      ...options,
-      secureJsonData: {
-        apiKey: event.target.value,
-      },
-    });
+  const onSecretChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({ ...options, secureJsonData: { clientSecret: e.target.value } });
   };
 
-  const onResetAPIKey = () => {
+  const onSecretReset = () => {
     onOptionsChange({
       ...options,
-      secureJsonFields: {
-        ...options.secureJsonFields,
-        apiKey: false,
-      },
-      secureJsonData: {
-        ...options.secureJsonData,
-        apiKey: '',
-      },
+      secureJsonFields: { ...secureJsonFields, clientSecret: false },
+      secureJsonData: { ...secureJsonData, clientSecret: '' },
     });
   };
 
   return (
     <>
-      <InlineField label="Path" labelWidth={14} interactive tooltip={'Json field returned to frontend'}>
+      <InlineField label="tstore-interface URL" labelWidth={24} tooltip="e.g. https://tstore.internal:8080">
         <Input
-          id="config-editor-path"
-          onChange={onPathChange}
-          value={jsonData.path}
-          placeholder="Enter the path, e.g. /api/v1"
           width={40}
+          value={jsonData.url || ''}
+          onChange={onJsonDataChange('url')}
+          placeholder="https://tstore.internal:8080"
         />
       </InlineField>
-      <InlineField label="API Key" labelWidth={14} interactive tooltip={'Secure json field (backend only)'}>
-        <SecretInput
-          required
-          id="config-editor-api-key"
-          isConfigured={secureJsonFields.apiKey}
-          value={secureJsonData?.apiKey}
-          placeholder="Enter your API key"
+
+      <InlineField label="Keycloak Token URL" labelWidth={24} tooltip="e.g. https://keycloak.internal/realms/transpara/protocol/openid-connect/token">
+        <Input
+          width={60}
+          value={jsonData.tokenUrl || ''}
+          onChange={onJsonDataChange('tokenUrl')}
+          placeholder="https://keycloak.internal/realms/transpara/protocol/openid-connect/token"
+        />
+      </InlineField>
+
+      <InlineField label="Client ID" labelWidth={24}>
+        <Input
           width={40}
-          onReset={onResetAPIKey}
-          onChange={onAPIKeyChange}
+          value={jsonData.clientId || ''}
+          onChange={onJsonDataChange('clientId')}
+          placeholder="tstore-grafana"
+        />
+      </InlineField>
+
+      <InlineField label="Client Secret" labelWidth={24}>
+        <SecretInput
+          width={40}
+          isConfigured={Boolean(secureJsonFields?.clientSecret)}
+          value={secureJsonData?.clientSecret || ''}
+          onReset={onSecretReset}
+          onChange={onSecretChange}
         />
       </InlineField>
     </>

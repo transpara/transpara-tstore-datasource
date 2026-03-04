@@ -1,14 +1,13 @@
 apiVersion: 1
 
 datasources:
-  - name: 'TStore Datasource'
-    type: 'transpara-tstore-datasource'
+  - name: TStore Datasource
+    type: transpara-tstore-datasource
     access: proxy
-    isDefault: false
-    orgId: 1
-    version: 1
-    editable: true
     jsonData:
-      path: '/resources'
+      url: 'https://tstore.internal:8080'
+      tokenUrl: 'https://keycloak.internal/realms/transpara/protocol/openid-connect/token'
+      clientId: 'tstore-grafana'
     secureJsonData:
-      apiKey: 'api-key'
+      # IMPORTANT: Do not commit real secrets here. Use environment variables or Grafana provisioning secrets.
+      clientSecret: 'changeme'
