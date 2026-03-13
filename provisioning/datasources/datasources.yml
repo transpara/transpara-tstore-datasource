@@ -5,9 +5,8 @@ datasources:
     type: transpara-tstore-datasource
     access: proxy
     jsonData:
-      url: 'https://tstore.internal:8080'
-      tokenUrl: 'https://keycloak.internal/realms/transpara/protocol/openid-connect/token'
-      clientId: 'tstore-grafana'
+      url: '${GF_DATASOURCE_URL}'
+      tokenUrl: '${GF_DATASOURCE_TOKEN_URL}'
+      clientId: '${GF_DATASOURCE_CLIENT_ID}'
     secureJsonData:
-      # Set GF_DATASOURCE_CLIENT_SECRET in your environment or .env file. Do not commit real secrets.
-      clientSecret: ${GF_DATASOURCE_CLIENT_SECRET}
+      clientSecret: '${GF_DATASOURCE_CLIENT_SECRET}'

@@ -8,7 +8,7 @@ export interface MyQuery extends DataQuery {
   aggInt: string;      // global agg_int override (empty = use per-lookup agg)
   tz: string;
   // Raw mode
-  rawJson: string;     // JSON body sent directly to /api/v1/read/historical-data
+  rawJson: string;     // JSON body sent directly to /api/v1/read/trend-data
 }
 
 export const DEFAULT_QUERY: Partial<MyQuery> = {

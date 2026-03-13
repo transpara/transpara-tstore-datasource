@@ -43,6 +43,7 @@ func NewDatasource(_ context.Context, s backend.DataSourceInstanceSettings) (*Da
 	if settings.URL == "" {
 		settings.URL = s.URL
 	}
+	settings.URL = strings.TrimRight(settings.URL, "/")
 	return &Datasource{
 		settings:     settings,
 		clientSecret: s.DecryptedSecureJSONData["clientSecret"],
@@ -134,7 +135,7 @@ func (d *Datasource) CallResource(ctx context.Context, req *backend.CallResource
 			}
 		}
 		params.Set("limit", "1000")
-		targetURL = d.settings.URL + "/api/v1/lookups?" + params.Encode()
+		targetURL = d.settings.URL + "/api/v1/lookups/?" + params.Encode()
 	default:
 		return sender.Send(&backend.CallResourceResponse{Status: http.StatusNotFound})
 	}

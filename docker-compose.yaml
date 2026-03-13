@@ -3,3 +3,8 @@ services:
     extends:
       file: .config/docker-compose-base.yaml
       service: grafana
+    environment:
+      GF_DATASOURCE_URL: ${GF_DATASOURCE_URL}
+      GF_DATASOURCE_TOKEN_URL: ${GF_DATASOURCE_TOKEN_URL}
+      GF_DATASOURCE_CLIENT_ID: ${GF_DATASOURCE_CLIENT_ID}
+      GF_DATASOURCE_CLIENT_SECRET: ${GF_DATASOURCE_CLIENT_SECRET}

@@ -4,6 +4,7 @@
   "id": "transpara-tstore-datasource",
   "backend": true,
   "executable": "gpx_tstore-datasource",
+  "metrics": true,
   "info": {
     "description": "Reads time-series data from tstore-interface (Transpara Platform)",
     "author": {

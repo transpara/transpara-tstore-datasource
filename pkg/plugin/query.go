@@ -48,6 +48,11 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 		qm.Tz = "UTC"
 	}
 
+	// Nothing to query yet — return empty rather than hitting tstore with an invalid request.
+	if qm.QueryType != "raw" && len(qm.Lookups) == 0 {
+		return backend.DataResponse{}
+	}
+
 	var reqBody []byte
 	var queryParams string
 
@@ -72,14 +77,25 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 		)
 		if qm.AggType != "" && qm.AggType != "raw" {
 			params += "&agg_type=" + qm.AggType
-		}
-		if qm.AggInt != "" {
-			params += "&agg_int=" + qm.AggInt
+			aggInt := qm.AggInt
+			if aggInt == "" && q.Interval > 0 {
+				aggInt = formatDuration(q.Interval)
+			}
+			if aggInt == "" {
+				aggInt = "5m"
+			}
+			params += "&agg_int=" + aggInt
 		}
 		queryParams = params
 	}
 
-	targetURL := d.settings.URL + "/api/v1/read/historical-data?" + queryParams
+	width := q.MaxDataPoints
+	if width <= 0 {
+		width = 100
+	}
+	queryParams += fmt.Sprintf("&width=%d", width)
+
+	targetURL := d.settings.URL + "/api/v1/read/trend-data?" + queryParams
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, targetURL, bytes.NewReader(reqBody))
 	if err != nil {
 		return backend.ErrDataResponse(backend.StatusInternal, err.Error())
@@ -156,4 +172,19 @@ func toDataFrames(result map[string][]dataPoint) backend.DataResponse {
 	}
 
 	return response
+}
+
+// formatDuration converts a time.Duration to a tstore-compatible interval string (e.g. "5m", "1h").
+func formatDuration(d time.Duration) string {
+	if d >= time.Hour && d%time.Hour == 0 {
+		return fmt.Sprintf("%dh", int(d.Hours()))
+	}
+	if d >= time.Minute {
+		mins := int(d.Minutes())
+		if mins < 1 {
+			mins = 1
+		}
+		return fmt.Sprintf("%dm", mins)
+	}
+	return "1m"
 }
