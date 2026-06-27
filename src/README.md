@@ -4,8 +4,7 @@ Visualize Transpara Platform process data — historian tags, asset model values
 
 This plugin queries `tstore-interface`, the Transpara Platform's REST API for time-series data, and renders it as native Grafana series so you can panel, alert, and Explore it like any other Grafana data source.
 
-<!-- TODO: insert screenshot of a panel with a real chart here once captured -->
-<!-- ![Time-series panel](https://raw.githubusercontent.com/<org>/transpara-tstore-datasource/main/src/img/screenshots/panel.png) -->
+![Unit 1 Operations Overview](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-dashboard-overview.png)
 
 ## Features
 
@@ -57,7 +56,6 @@ In Grafana, go to **Connections → Data sources → Add new data source** and s
 
 Click **Save & test**. A green "Datasource is working" toast confirms Keycloak auth and `tstore-interface` reachability end-to-end.
 
-<!-- TODO: insert screenshot of config page with green health check here -->
 
 ### Provisioning
 
@@ -91,13 +89,13 @@ The default editor. Three controls, no JSON:
 - **Aggregation** — `avg`, `min`, `max`, `sum`, `count`, `median`, `twavg`, or `raw`.
 - **Interval** *(optional)* — e.g. `5m`, `1h`. Leave blank to let Grafana's auto-interval pick the best resolution for the panel width.
 
-<!-- TODO: insert screenshot of visual query editor here -->
+![Visual Query Editor](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-query-editor.png)
 
 ### Raw mode
 
 Toggle to **Raw** to send a JSON body directly to `POST /api/v1/read/trend-data`. Useful for queries that can't be expressed in the visual editor, or when you're iterating on a server-side feature. Switching from Visual → Raw seeds the JSON with the current visual selection so you can start from a known-good payload.
 
-<!-- TODO: insert screenshot of raw query editor here -->
+![Panel Detail — RCS Temperature, RCP Loop Flow, Pressurizer Level](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-panel-detail.png)
 
 ### Time range and variables
 
