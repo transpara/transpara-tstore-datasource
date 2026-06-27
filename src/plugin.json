@@ -23,6 +23,10 @@
       {
         "name": "RCS Temperature, RCP Loop Flow, and Pressurizer Level",
         "path": "img/screenshot-panel-detail.png"
+      },
+      {
+        "name": "Visual Query Editor — Dataset and Lookup Selection",
+        "path": "img/screenshot-query-editor.png"
       }
     ],
     "keywords": [
