@@ -6,16 +6,62 @@
   "executable": "gpx_tstore-datasource",
   "metrics": true,
   "info": {
-    "description": "Reads time-series data from tstore-interface (Transpara Platform)",
+    "description": "Visualize Transpara Platform process data — historian tags, asset model values, and KPIs — in Grafana dashboards.",
     "author": {
-      "name": "Transpara"
+      "name": "Transpara",
+      "url": "https://transpara.com"
     },
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
+    "screenshots": [
+      {
+        "name": "Unit 1 Operations Overview",
+        "path": "img/screenshot-dashboard-overview.png"
+      },
+      {
+        "name": "RCS Temperature, RCP Loop Flow, and Pressurizer Level",
+        "path": "img/screenshot-panel-detail.png"
+      }
+    ],
+    "keywords": [
+      "transpara",
+      "visual kpi",
+      "historian",
+      "time series",
+      "scada",
+      "industrial",
+      "iot",
+      "iiot",
+      "process data",
+      "asset model",
+      "tstore"
+    ],
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://transpara.com"
+      },
+      {
+        "name": "Documentation",
+        "url": "https://docs.transpara.com/"
+      },
+      {
+        "name": "Source code",
+        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource"
+      },
+      {
+        "name": "Report a bug",
+        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource/issues"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource/blob/main/LICENSE"
+      }
+    ],
     "version": "1.0.0",
-    "updated": "2026-03-04"
+    "updated": "2026-06-11"
   },
   "dependencies": {
     "grafanaDependency": ">=10.0.0",

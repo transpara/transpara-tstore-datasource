@@ -47,3 +47,13 @@ ci/
 .idea
 
 .eslintcache
+
+# Local tooling caches
+.cache/
+.memsearch/
+
+# Dashboard exports (local use only)
+dashboards/
+
+# Plugin validator zip artifacts
+*.zip
