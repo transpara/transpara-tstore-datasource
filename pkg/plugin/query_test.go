@@ -77,6 +77,54 @@ func TestQueryData_VisualMode(t *testing.T) {
 	}
 }
 
+func TestQueryData_VisualMode_ForwardsAggParams(t *testing.T) {
+	keycloak := makeKeycloakMock(t)
+	defer keycloak.Close()
+
+	var capturedAggType, capturedAggInt string
+	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedAggType = r.URL.Query().Get("agg_type")
+		capturedAggInt = r.URL.Query().Get("agg_int")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{})
+	}))
+	defer tstore.Close()
+
+	ds, err := makeTestPlugin(tstore.URL, keycloak.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	queryJSON, _ := json.Marshal(map[string]interface{}{
+		"queryType": "visual",
+		"lookups":   []string{"plant-a|sensor_id=123"},
+		"aggType":   "max",
+		"aggInt":    "5m",
+		"tz":        "UTC",
+	})
+
+	req := &backend.QueryDataRequest{
+		Queries: []backend.DataQuery{
+			{
+				RefID:     "A",
+				JSON:      queryJSON,
+				TimeRange: backend.TimeRange{From: time.Now().Add(-1 * time.Hour), To: time.Now()},
+			},
+		},
+	}
+
+	_, err = ds.QueryData(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if capturedAggType != "max" {
+		t.Errorf("expected aggType=max, got %q", capturedAggType)
+	}
+	if capturedAggInt != "5m" {
+		t.Errorf("expected aggInt=5m, got %q", capturedAggInt)
+	}
+}
+
 func TestQueryData_RawMode(t *testing.T) {
 	keycloak := makeKeycloakMock(t)
 	defer keycloak.Close()
