@@ -36,7 +36,7 @@ func TestFetchToken_Success(t *testing.T) {
 		ClientID: "test-client",
 	}
 
-	token, _, err := plugin.FetchToken(context.Background(), settings, "test-secret")
+	token, _, err := plugin.FetchToken(context.Background(), http.DefaultClient, settings, "test-secret")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestTokenCache_RefreshesOnExpiry(t *testing.T) {
 	cache := plugin.NewTokenCache()
 	settings := plugin.AuthSettings{TokenURL: srv.URL, ClientID: "c"}
 
-	tok1, err := cache.GetToken(context.Background(), settings, "secret")
+	tok1, err := cache.GetToken(context.Background(), http.DefaultClient, settings, "secret")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestTokenCache_RefreshesOnExpiry(t *testing.T) {
 	// Force expiry
 	time.Sleep(2 * time.Second)
 
-	tok2, err := cache.GetToken(context.Background(), settings, "secret")
+	tok2, err := cache.GetToken(context.Background(), http.DefaultClient, settings, "secret")
 	if err != nil {
 		t.Fatal(err)
 	}

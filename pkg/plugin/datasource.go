@@ -63,7 +63,7 @@ func (d *Datasource) authSettings() AuthSettings {
 // doRequest executes an HTTP request against tstore-interface with a Bearer token.
 // On 401, clears the token cache and retries once.
 func (d *Datasource) doRequest(ctx context.Context, req *http.Request) (*http.Response, error) {
-	token, err := d.tokenCache.GetToken(ctx, d.authSettings(), d.clientSecret)
+	token, err := d.tokenCache.GetToken(ctx, d.httpClient, d.authSettings(), d.clientSecret)
 	if err != nil {
 		return nil, fmt.Errorf("fetching token: %w", err)
 	}
@@ -77,7 +77,7 @@ func (d *Datasource) doRequest(ctx context.Context, req *http.Request) (*http.Re
 	if resp.StatusCode == http.StatusUnauthorized {
 		resp.Body.Close()
 		d.tokenCache.Reset()
-		token, err = d.tokenCache.GetToken(ctx, d.authSettings(), d.clientSecret)
+		token, err = d.tokenCache.GetToken(ctx, d.httpClient, d.authSettings(), d.clientSecret)
 		if err != nil {
 			return nil, fmt.Errorf("refreshing token: %w", err)
 		}

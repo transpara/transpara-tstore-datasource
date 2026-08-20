@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -58,11 +59,11 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 
 	if qm.QueryType == "raw" {
 		reqBody = []byte(qm.RawJson)
-		queryParams = fmt.Sprintf("start_time=%s&end_time=%s&tz=%s",
-			q.TimeRange.From.UTC().Format(time.RFC3339),
-			q.TimeRange.To.UTC().Format(time.RFC3339),
-			qm.Tz,
-		)
+		params := url.Values{}
+		params.Set("start_time", q.TimeRange.From.UTC().Format(time.RFC3339))
+		params.Set("end_time", q.TimeRange.To.UTC().Format(time.RFC3339))
+		params.Set("tz", qm.Tz)
+		queryParams = params.Encode()
 	} else {
 		body, err := json.Marshal(qm.Lookups)
 		if err != nil {
@@ -70,13 +71,12 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 		}
 		reqBody = body
 
-		params := fmt.Sprintf("start_time=%s&end_time=%s&tz=%s",
-			q.TimeRange.From.UTC().Format(time.RFC3339),
-			q.TimeRange.To.UTC().Format(time.RFC3339),
-			qm.Tz,
-		)
+		params := url.Values{}
+		params.Set("start_time", q.TimeRange.From.UTC().Format(time.RFC3339))
+		params.Set("end_time", q.TimeRange.To.UTC().Format(time.RFC3339))
+		params.Set("tz", qm.Tz)
 		if qm.AggType != "" && qm.AggType != "raw" {
-			params += "&agg_type=" + qm.AggType
+			params.Set("agg_type", qm.AggType)
 			aggInt := qm.AggInt
 			if aggInt == "" && q.Interval > 0 {
 				aggInt = formatDuration(q.Interval)
@@ -84,9 +84,9 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 			if aggInt == "" {
 				aggInt = "5m"
 			}
-			params += "&agg_int=" + aggInt
+			params.Set("agg_int", aggInt)
 		}
-		queryParams = params
+		queryParams = params.Encode()
 	}
 
 	width := q.MaxDataPoints

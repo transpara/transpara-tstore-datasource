@@ -25,7 +25,7 @@ type tokenResponse struct {
 
 // FetchToken performs a client_credentials grant against the Keycloak token endpoint.
 // Returns the access token and its expiry time.
-func FetchToken(ctx context.Context, settings AuthSettings, clientSecret string) (string, time.Time, error) {
+func FetchToken(ctx context.Context, httpClient *http.Client, settings AuthSettings, clientSecret string) (string, time.Time, error) {
 	form := url.Values{
 		"grant_type":    {"client_credentials"},
 		"client_id":     {settings.ClientID},
@@ -38,7 +38,7 @@ func FetchToken(ctx context.Context, settings AuthSettings, clientSecret string)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("token request failed: %w", err)
 	}
@@ -79,7 +79,7 @@ func (c *TokenCache) Reset() {
 }
 
 // GetToken returns the cached token, fetching a new one if expired or absent.
-func (c *TokenCache) GetToken(ctx context.Context, settings AuthSettings, clientSecret string) (string, error) {
+func (c *TokenCache) GetToken(ctx context.Context, httpClient *http.Client, settings AuthSettings, clientSecret string) (string, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -87,7 +87,7 @@ func (c *TokenCache) GetToken(ctx context.Context, settings AuthSettings, client
 		return c.token, nil
 	}
 
-	token, expiry, err := FetchToken(ctx, settings, clientSecret)
+	token, expiry, err := FetchToken(ctx, httpClient, settings, clientSecret)
 	if err != nil {
 		return "", err
 	}

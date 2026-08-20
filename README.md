@@ -53,4 +53,4 @@ Frontend (React/TypeScript) + Go backend (Grafana plugin SDK).
 
 **Visual mode:** Select a dataset, pick lookups from a dropdown, choose aggregation function and interval.
 
-**Raw mode:** Write the JSON body directly sent to `POST /api/v1/read/historical-data`. Toggle from visual→raw serializes your current selection as JSON.
+**Raw mode:** Write the JSON body directly sent to `POST /api/v1/read/trend-data`. Toggle from visual→raw serializes your current selection as JSON.

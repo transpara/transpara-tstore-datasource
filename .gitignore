@@ -52,6 +52,16 @@ ci/
 .cache/
 .memsearch/
 
+# AI assistant configs (local dev only)
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+.claude/
+.config/AGENTS/
+
+# Internal docs
+testplan.md
+
 # Dashboard exports (local use only)
 dashboards/
 

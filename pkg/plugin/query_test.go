@@ -16,7 +16,7 @@ func TestQueryData_VisualMode(t *testing.T) {
 	defer keycloak.Close()
 
 	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/v1/read/historical-data" {
+		if r.URL.Path != "/api/v1/read/trend-data" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
 		var body []string
