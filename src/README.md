@@ -4,7 +4,7 @@ Visualize Transpara Platform process data — historian tags, asset model values
 
 This plugin queries `tstore-interface`, the Transpara Platform's REST API for time-series data, and renders it as native Grafana series so you can panel, alert, and Explore it like any other Grafana data source.
 
-![Unit 1 Operations Overview](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-dashboard-overview.png)
+![Unit 1 Operations Overview](https://raw.githubusercontent.com/transpara/transpara-tstore-datasource/main/src/img/screenshot-dashboard-overview.png)
 
 ## Features
 
@@ -33,7 +33,7 @@ In Grafana, go to **Administration → Plugins**, search for **TStore Datasource
 
 ### Manual install (air-gapped)
 
-1. Download the latest release archive from the [releases page](https://github.com/brettdbrewer/transpara-tstore-datasource/releases). <!-- TODO: update URL after org move -->
+1. Download the latest release archive from the [releases page](https://github.com/transpara/transpara-tstore-datasource/releases).
 2. Extract into your Grafana plugins directory:
    ```bash
    unzip transpara-tstore-datasource-<version>.zip \
@@ -89,13 +89,13 @@ The default editor. Three controls, no JSON:
 - **Aggregation** — `avg`, `min`, `max`, `sum`, `count`, `median`, `twavg`, or `raw`.
 - **Interval** *(optional)* — e.g. `5m`, `1h`. Leave blank to let Grafana's auto-interval pick the best resolution for the panel width.
 
-![Visual Query Editor](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-query-editor.png)
+![Visual Query Editor](https://raw.githubusercontent.com/transpara/transpara-tstore-datasource/main/src/img/screenshot-query-editor.png)
 
 ### Raw mode
 
 Toggle to **Raw** to send a JSON body directly to `POST /api/v1/read/trend-data`. Useful for queries that can't be expressed in the visual editor, or when you're iterating on a server-side feature. Switching from Visual → Raw seeds the JSON with the current visual selection so you can start from a known-good payload.
 
-![Panel Detail — RCS Temperature, RCP Loop Flow, Pressurizer Level](https://raw.githubusercontent.com/brettdbrewer/transpara-tstore-datasource/master/src/img/screenshot-panel-detail.png)
+![Panel Detail — RCS Temperature, RCP Loop Flow, Pressurizer Level](https://raw.githubusercontent.com/transpara/transpara-tstore-datasource/main/src/img/screenshot-panel-detail.png)
 
 ### Time range and variables
 
@@ -122,10 +122,10 @@ The backend (Go) handles every outbound call. The browser never sees the Keycloa
 
 ## Support
 
-- **Issues and feature requests:** [GitHub Issues](https://github.com/brettdbrewer/transpara-tstore-datasource/issues) <!-- TODO: update after org move -->
+- **Issues and feature requests:** [GitHub Issues](https://github.com/transpara/transpara-tstore-datasource/issues)
 - **Documentation:** [docs.transpara.com](https://docs.transpara.com/)
 - **Contact:** support@transpara.com
 
 ## License
 
-MIT. See [LICENSE](https://github.com/brettdbrewer/transpara-tstore-datasource/blob/main/LICENSE). <!-- TODO: update URL after org move -->
+MIT. See [LICENSE](https://github.com/transpara/transpara-tstore-datasource/blob/main/LICENSE).

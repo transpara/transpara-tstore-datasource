@@ -53,15 +53,15 @@
       },
       {
         "name": "Source code",
-        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource"
+        "url": "https://github.com/transpara/transpara-tstore-datasource"
       },
       {
         "name": "Report a bug",
-        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource/issues"
+        "url": "https://github.com/transpara/transpara-tstore-datasource/issues"
       },
       {
         "name": "License",
-        "url": "https://github.com/brettdbrewer/transpara-tstore-datasource/blob/main/LICENSE"
+        "url": "https://github.com/transpara/transpara-tstore-datasource/blob/main/LICENSE"
       }
     ],
     "version": "1.0.0",
