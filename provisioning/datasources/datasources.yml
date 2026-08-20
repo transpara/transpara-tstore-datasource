@@ -5,8 +5,8 @@ datasources:
     type: transpara-tstore-datasource
     access: proxy
     jsonData:
-      url: '${GF_DATASOURCE_URL}'
-      tokenUrl: '${GF_DATASOURCE_TOKEN_URL}'
-      clientId: '${GF_DATASOURCE_CLIENT_ID}'
+      url: '$__env{GF_DATASOURCE_URL}'
+      tokenUrl: '$__env{GF_DATASOURCE_TOKEN_URL}'
+      clientId: '$__env{GF_DATASOURCE_CLIENT_ID}'
     secureJsonData:
-      clientSecret: '${GF_DATASOURCE_CLIENT_SECRET}'
+      clientSecret: '$__env{GF_DATASOURCE_CLIENT_SECRET}'
