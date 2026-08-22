@@ -39,7 +39,6 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
   // Load lookups when dataset changes
   useEffect(() => {
     if (!selectedDataset) {
-      setLookupOptions([]);
       return;
     }
     datasource.getLookups(selectedDataset).then((ls) => {
@@ -97,7 +96,7 @@ export function QueryEditor({ query, onChange, onRunQuery, datasource }: Props) 
       <InlineField label="Lookups" labelWidth={12}>
         <MultiSelect
           width={60}
-          options={lookupOptions}
+          options={selectedDataset ? lookupOptions : []}
           value={q.lookups ?? []}
           onChange={(vals) => onChange({ ...q, lookups: vals.map((v) => v.value as string) })}
           onBlur={onRunQuery}

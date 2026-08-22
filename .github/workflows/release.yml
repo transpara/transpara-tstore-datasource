@@ -19,6 +19,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
       - uses: grafana/plugin-actions/build-plugin@build-plugin/v1.0.2
         with:
           # Grafana access policy token for signing — stored in repository secrets.
