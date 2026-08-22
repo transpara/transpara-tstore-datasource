@@ -1,6 +1,6 @@
 {
   "name": "t-store-datasource",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
@@ -33,7 +33,7 @@
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.0",
@@ -71,8 +71,8 @@
     "@grafana/data": "^13.2.0",
     "@grafana/i18n": "^13.2.0",
     "@grafana/runtime": "^13.2.0",
-    "@grafana/ui": "^13.2.0",
     "@grafana/schema": "^13.2.0",
+    "@grafana/ui": "^13.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
