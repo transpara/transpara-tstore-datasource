@@ -75,7 +75,7 @@ func (d *Datasource) doRequest(ctx context.Context, req *http.Request) (*http.Re
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		d.tokenCache.Reset()
 		token, err = d.tokenCache.GetToken(ctx, d.httpClient, d.authSettings(), d.clientSecret)
 		if err != nil {
@@ -103,7 +103,7 @@ func (d *Datasource) CheckHealth(ctx context.Context, _ *backend.CheckHealthRequ
 	if err != nil {
 		return &backend.CheckHealthResult{Status: backend.HealthStatusError, Message: err.Error()}, nil
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return &backend.CheckHealthResult{
@@ -152,7 +152,7 @@ func (d *Datasource) CallResource(ctx context.Context, req *backend.CallResource
 			Body:   []byte(err.Error()),
 		})
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

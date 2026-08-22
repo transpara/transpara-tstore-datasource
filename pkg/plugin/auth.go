@@ -42,7 +42,7 @@ func FetchToken(ctx context.Context, httpClient *http.Client, settings AuthSetti
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("token request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", time.Time{}, fmt.Errorf("token endpoint returned %d", resp.StatusCode)

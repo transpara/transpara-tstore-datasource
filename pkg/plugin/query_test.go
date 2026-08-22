@@ -20,17 +20,21 @@ func TestQueryData_VisualMode(t *testing.T) {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
 		var body []string
-		json.NewDecoder(r.Body).Decode(&body)
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decode request body: %v", err)
+		}
 		if len(body) != 1 || body[0] != "plant-a|sensor_id=123" {
 			t.Errorf("unexpected lookup body: %v", body)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"plant-a|sensor_id=123": []map[string]interface{}{
 				{"ts": "2024-01-01T00:00:00Z", "v": "42.5", "dv": "42.5"},
 				{"ts": "2024-01-01T00:01:00Z", "v": "43.0", "dv": "43.0"},
 			},
-		})
+		}); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer tstore.Close()
 
@@ -86,7 +90,9 @@ func TestQueryData_VisualMode_ForwardsAggParams(t *testing.T) {
 		capturedAggType = r.URL.Query().Get("agg_type")
 		capturedAggInt = r.URL.Query().Get("agg_int")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{}); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer tstore.Close()
 
@@ -140,7 +146,9 @@ func TestQueryData_RawMode(t *testing.T) {
 			t.Errorf("unexpected body: %v", body)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{}); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer tstore.Close()
 
@@ -182,7 +190,9 @@ func TestQueryData_RawMode_UsesQueryTz(t *testing.T) {
 	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		capturedTz = r.URL.Query().Get("tz")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{}); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer tstore.Close()
 

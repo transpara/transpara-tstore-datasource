@@ -24,10 +24,12 @@ func TestFetchToken_Success(t *testing.T) {
 			t.Errorf("expected client_id=test-client, got %s", r.FormValue("client_id"))
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"access_token": "test-token-123",
 			"expires_in":   3600,
-		})
+		}); err != nil {
+			t.Errorf("encode token response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -50,10 +52,12 @@ func TestTokenCache_RefreshesOnExpiry(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		n := callCount.Add(1)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"access_token": "token-" + string(rune('0'+n)),
 			"expires_in":   1, // 1 second — expires immediately for test
-		})
+		}); err != nil {
+			t.Errorf("encode token response: %v", err)
+		}
 	}))
 	defer srv.Close()
 

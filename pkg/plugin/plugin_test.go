@@ -26,10 +26,12 @@ func makeTestPlugin(tstoreURL, keycloakURL string) (*plugin.Datasource, error) {
 func makeKeycloakMock(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"access_token": "mock-token",
 			"expires_in":   3600,
-		})
+		}); err != nil {
+			t.Errorf("keycloak mock encode: %v", err)
+		}
 	}))
 }
 
@@ -91,7 +93,9 @@ func TestCallResource_Datasets(t *testing.T) {
 	tstore := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/dataset" {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode([]string{"plant-a", "plant-b"})
+			if err := json.NewEncoder(w).Encode([]string{"plant-a", "plant-b"}); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)
@@ -114,7 +118,9 @@ func TestCallResource_Datasets(t *testing.T) {
 		t.Errorf("expected 200, got %d", captured.Status)
 	}
 	var result []string
-	json.Unmarshal(captured.Body, &result)
+	if err := json.Unmarshal(captured.Body, &result); err != nil {
+		t.Fatal(err)
+	}
 	if len(result) != 2 || result[0] != "plant-a" {
 		t.Errorf("unexpected datasets: %v", result)
 	}
@@ -129,10 +135,12 @@ func TestCallResource_Lookups(t *testing.T) {
 		if strings.HasPrefix(r.URL.Path, "/api/v1/lookups") {
 			capturedFilter = r.URL.Query().Get("filter")
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{
 				"results":     []string{"plant-a|sensor_id=123"},
 				"total_count": 1,
-			})
+			}); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)
@@ -158,7 +166,9 @@ func TestCallResource_Lookups(t *testing.T) {
 		t.Errorf("expected filter=plant-a, got %q", capturedFilter)
 	}
 	var result []string
-	json.Unmarshal(captured.Body, &result)
+	if err := json.Unmarshal(captured.Body, &result); err != nil {
+		t.Fatal(err)
+	}
 	if len(result) != 1 || result[0] != "plant-a|sensor_id=123" {
 		t.Errorf("unexpected result: %v", result)
 	}
