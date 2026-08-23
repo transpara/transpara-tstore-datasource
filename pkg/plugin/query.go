@@ -106,7 +106,7 @@ func (d *Datasource) runQuery(ctx context.Context, q backend.DataQuery) backend.
 	if err != nil {
 		return backend.ErrDataResponse(backend.StatusBadGateway, err.Error())
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
