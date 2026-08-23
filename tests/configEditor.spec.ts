@@ -14,6 +14,7 @@ test('"Save & test" should be successful when configuration is valid', async ({
   readProvisionedDataSource,
   page,
 }) => {
+  test.skip(!!process.env.CI, 'requires a running tstore-interface; skipped in CI');
   const ds = await readProvisionedDataSource({ fileName: 'datasources.yml' });
   const configPage = await createDataSourceConfigPage({ type: ds.type });
   await page.getByLabel('tstore-interface URL').fill(ds.jsonData.url ?? '');

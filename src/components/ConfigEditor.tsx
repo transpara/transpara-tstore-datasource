@@ -32,6 +32,7 @@ export function ConfigEditor({ options, onOptionsChange }: Props) {
           value={jsonData.url || ''}
           onChange={onJsonDataChange('url')}
           placeholder="https://tstore.internal:8080"
+          aria-label="tstore-interface URL"
         />
       </InlineField>
 
@@ -41,6 +42,7 @@ export function ConfigEditor({ options, onOptionsChange }: Props) {
           value={jsonData.tokenUrl || ''}
           onChange={onJsonDataChange('tokenUrl')}
           placeholder="https://keycloak.internal/realms/transpara/protocol/openid-connect/token"
+          aria-label="Keycloak Token URL"
         />
       </InlineField>
 
@@ -50,6 +52,7 @@ export function ConfigEditor({ options, onOptionsChange }: Props) {
           value={jsonData.clientId || ''}
           onChange={onJsonDataChange('clientId')}
           placeholder="tstore-grafana"
+          aria-label="Client ID"
         />
       </InlineField>
 
@@ -60,6 +63,7 @@ export function ConfigEditor({ options, onOptionsChange }: Props) {
           value={secureJsonData?.clientSecret || ''}
           onReset={onSecretReset}
           onChange={onSecretChange}
+          aria-label="Client Secret"
         />
       </InlineField>
     </>
