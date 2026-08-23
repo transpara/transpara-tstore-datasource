@@ -12,6 +12,6 @@ test('smoke: should render query editor in visual mode', async ({ panelEditPage,
 test('should show Raw mode editor when Raw is selected', async ({ panelEditPage, readProvisionedDataSource, page }) => {
   const ds = await readProvisionedDataSource({ fileName: 'datasources.yml' });
   await panelEditPage.datasource.set(ds.name);
-  await page.getByRole('radio', { name: 'Raw' }).click({ force: true });
+  await page.locator('label').filter({ hasText: /^Raw$/ }).click();
   await expect(page.getByText('Query JSON')).toBeVisible();
 });
