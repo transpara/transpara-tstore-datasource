@@ -54,12 +54,3 @@ Frontend (React/TypeScript) + Go backend (Grafana plugin SDK).
 **Visual mode:** Select a dataset, pick lookups from a dropdown, choose aggregation function and interval.
 
 **Raw mode:** Write the JSON body directly sent to `POST /api/v1/read/trend-data`. Toggle from visual→raw serializes your current selection as JSON.
-
-## Developer Docs
-
-| Doc | Description |
-|---|---|
-| [Architecture](docs/architecture.md) | System context, component diagrams, data flow, auth state, lookup string format |
-| [Development Guide](docs/development.md) | Prerequisites, build commands, local Docker dev, debugging, CI/CD, releasing |
-| [Configuration Reference](docs/configuration.md) | All config fields, env vars, provisioning, common mistakes |
-| [Plugin Internals](docs/internals.md) | Key patterns for new developers: 401 retry, token cache, interval resolution, nullable values, frame naming |
