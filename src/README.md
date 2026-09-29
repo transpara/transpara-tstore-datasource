@@ -19,7 +19,9 @@ This plugin queries `tstore-interface`, the Transpara Platform's REST API for ti
 
 ## Requirements
 
-- Grafana **10.0.0** or newer (works on Grafana OSS, Enterprise, and Cloud).
+- Grafana **10.0.0** or newer, **self-hosted** (Grafana OSS or Enterprise).
+  Grafana Cloud is **not supported** — Cloud only runs plugins from the Grafana catalog, and this plugin is distributed directly by Transpara.
+- Filesystem and config access to the Grafana server (this plugin is installed by hand, not from the catalog).
 - Network access from the Grafana server to:
   - A running `tstore-interface` deployment
   - The Keycloak realm fronting it
@@ -27,21 +29,92 @@ This plugin queries `tstore-interface`, the Transpara Platform's REST API for ti
 
 ## Install
 
-### From the Grafana plugin catalog
+This plugin is **not published in the Grafana plugin catalog**. It is distributed directly by Transpara as an unsigned plugin and installed by copying it into your Grafana server's plugins directory ("side-loading"). This is a supported, documented Grafana installation path — see Grafana's [`allow_loading_unsigned_plugins`](https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#allow_loading_unsigned_plugins) documentation.
 
-In Grafana, go to **Administration → Plugins**, search for **TStore Datasource**, and click **Install**. Restart is not required.
+Because the plugin is unsigned, Grafana will refuse to load it until you explicitly allow it by plugin ID. That is one config line, described in step 3.
 
-### Manual install (air-gapped)
+### 1. Get the plugin
 
-1. Download the latest release archive from the [releases page](https://github.com/transpara/transpara-tstore-datasource/releases).
-2. Extract into your Grafana plugins directory:
-   ```bash
-   unzip transpara-tstore-datasource-<version>.zip \
-     -d /var/lib/grafana/plugins/
-   ```
-3. Restart the Grafana server.
+Download the latest release archive from the [releases page](https://github.com/transpara/transpara-tstore-datasource/releases), or build it from source (see [CONTRIBUTING.md](https://github.com/transpara/transpara-tstore-datasource/blob/main/CONTRIBUTING.md)).
 
-The plugin is signed by Transpara; no `allow_loading_unsigned_plugins` override is required.
+### 2. Extract into the Grafana plugins directory
+
+```bash
+unzip transpara-tstore-datasource-<version>.zip -d /var/lib/grafana/plugins/
+```
+
+The resulting directory **must** be named `transpara-tstore-datasource` — it has to match the plugin `id` in `plugin.json`, or Grafana will not match it against the allow-list in the next step.
+
+Make sure the files are readable by the Grafana service account and the backend binary is executable:
+
+```bash
+chown -R grafana:grafana /var/lib/grafana/plugins/transpara-tstore-datasource
+chmod +x /var/lib/grafana/plugins/transpara-tstore-datasource/gpx_tstore-datasource*
+```
+
+Common plugin directories:
+
+| Platform | Path |
+|---|---|
+| Linux package install | `/var/lib/grafana/plugins` |
+| Docker / Kubernetes | `/var/lib/grafana/plugins` (mount a volume or bake into the image) |
+| macOS (Homebrew) | `/opt/homebrew/var/lib/grafana/plugins` |
+| Windows | `C:\Program Files\GrafanaLabs\grafana\data\plugins` |
+
+### 3. Allow the unsigned plugin
+
+Add the plugin ID to the unsigned allow-list in `grafana.ini` (or `custom.ini`):
+
+```ini
+[plugins]
+allow_loading_unsigned_plugins = transpara-tstore-datasource
+```
+
+Or, equivalently, as an environment variable — the usual choice for Docker and Kubernetes:
+
+```bash
+GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=transpara-tstore-datasource
+```
+
+If you already allow other unsigned plugins, this is a comma-separated list:
+
+```ini
+allow_loading_unsigned_plugins = some-other-plugin,transpara-tstore-datasource
+```
+
+### 4. Restart Grafana
+
+```bash
+systemctl restart grafana-server
+```
+
+Then confirm under **Administration → Plugins → TStore Datasource** that the plugin is listed, and continue to [Configure](#configure).
+
+### What you will see because the plugin is unsigned
+
+None of these block anything once step 3 is done — they are expected:
+
+| Where | What appears | What to do |
+|---|---|---|
+| Grafana server log, at startup | `Permitting unsigned plugin. This is not recommended` | Nothing. This is Grafana acknowledging your allow-list entry. |
+| **Administration → Plugins** | An **Unsigned** badge next to TStore Datasource | Nothing. Cosmetic. |
+| Data source config page | A warning banner noting the plugin is unsigned | Nothing. The data source works normally. |
+
+If you **skipped or mistyped** step 3, the symptom is different: the plugin simply never appears in the data source list, and the server log shows
+
+```
+plugin registration failed ... error="plugin 'transpara-tstore-datasource' is unsigned"
+```
+
+Fix the plugin ID in `allow_loading_unsigned_plugins` (it must match the directory name exactly) and restart.
+
+### Upgrading
+
+Replace the directory contents with the new release and restart Grafana. The `allow_loading_unsigned_plugins` entry does not need to change.
+
+### Air-gapped environments
+
+Side-loading is the only install method, so air-gapped sites need no special handling: transfer the release archive across the boundary and follow the same four steps. No outbound network access to `grafana.com` is required at install time or at runtime.
 
 ## Configure
 

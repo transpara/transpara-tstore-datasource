@@ -89,9 +89,9 @@ Switching from visual to raw mode serializes your current `lookups[]` selection 
 
 ---
 
-## Unsigned Plugin (local / air-gapped installs)
+## Unsigned Plugin (required for every install)
 
-When installing the plugin outside of the Grafana marketplace, you must allow unsigned plugins in `grafana.ini`:
+The plugin is not published in the Grafana plugin catalog. It is distributed directly by Transpara and side-loaded as an **unsigned** plugin, so **every** installation must add the plugin ID to Grafana's unsigned allow-list. Without it, Grafana refuses to load the plugin and it never appears in the data source list.
 
 ```ini
 [plugins]
@@ -103,7 +103,32 @@ Or via environment variable:
 GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=transpara-tstore-datasource
 ```
 
-The local Docker dev stack sets this automatically.
+The value is a comma-separated list of plugin IDs, and each ID must match both the `id` in `plugin.json` and the plugin's directory name under the Grafana plugins path.
+
+The local Docker dev stack sets this automatically (see `.config/docker-compose-base.yaml`).
+
+### Kubernetes
+
+```yaml
+env:
+  - name: GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS
+    value: transpara-tstore-datasource
+```
+
+Mount the built plugin at `/var/lib/grafana/plugins/transpara-tstore-datasource` (init container, ConfigMap-free volume, or baked into a custom Grafana image).
+
+### Expected warnings
+
+| Where | Message | Action |
+|---|---|---|
+| Server log at startup | `Permitting unsigned plugin. This is not recommended` | None — this confirms the allow-list entry was read. |
+| Administration → Plugins | **Unsigned** badge on the plugin | None — cosmetic. |
+| Data source config page | Unsigned-plugin warning banner | None — the data source functions normally. |
+| Server log, plugin missing | `plugin registration failed ... is unsigned` | The allow-list entry is missing or the ID is wrong. Fix and restart. |
+
+### Grafana Cloud
+
+Grafana Cloud only runs plugins from the Grafana catalog and does not honour `allow_loading_unsigned_plugins`. This plugin therefore requires **self-hosted** Grafana (OSS or Enterprise).
 
 ---
 

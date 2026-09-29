@@ -18,19 +18,33 @@ go test ./pkg/plugin/... -v -race   # Go backend tests
 npm test -- --watchAll=false         # frontend tests
 ```
 
-## Install (local / air-gapped)
+## Install
 
-1. Build the plugin: `mage -v build:backend`
-2. Copy `dist/` to your Grafana plugin directory:
+The plugin is **not published in the Grafana plugin catalog**. Side-loading an unsigned build into a self-hosted Grafana is the only supported install method. Grafana Cloud cannot run it.
+
+1. Build the plugin (or download a release archive):
+   ```bash
+   npm run build && mage -v buildAll
+   ```
+2. Copy `dist/` to your Grafana plugin directory, named exactly after the plugin ID:
    ```bash
    cp -r dist/ /var/lib/grafana/plugins/transpara-tstore-datasource
+   chown -R grafana:grafana /var/lib/grafana/plugins/transpara-tstore-datasource
    ```
-3. Allow unsigned plugins in `grafana.ini`:
+3. Allow the unsigned plugin in `grafana.ini`:
    ```ini
    [plugins]
    allow_loading_unsigned_plugins = transpara-tstore-datasource
    ```
-4. Restart Grafana and add the data source under **Configuration → Data Sources → TStore Datasource**.
+   Or via environment variable (Docker/Kubernetes):
+   ```bash
+   GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=transpara-tstore-datasource
+   ```
+4. Restart Grafana and add the data source under **Connections → Data sources → TStore Datasource**.
+
+Grafana will log `Permitting unsigned plugin. This is not recommended` at startup and show an **Unsigned** badge on the plugin page. Both are expected and harmless. If step 3 is missing or the ID is misspelled, the plugin will not load at all and the log will say `plugin 'transpara-tstore-datasource' is unsigned`.
+
+Full end-user install guide, including per-platform plugin paths and upgrade steps: [src/README.md](src/README.md).
 
 ## Configuration
 

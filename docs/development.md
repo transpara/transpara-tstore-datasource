@@ -221,7 +221,7 @@ Breakpoints set in `pkg/plugin/` will be hit when Grafana calls the plugin.
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `ci.yml` | Push / PR to `main` | typecheck → lint → unit tests → build → golangci-lint → mage buildAll → mage test → e2e matrix → validate plugin |
-| `release.yml` | `v*` tag push | Full build + sign with `GRAFANA_ACCESS_POLICY_TOKEN` → GitHub release with attestation |
+| `release.yml` | `v*` tag push | Full build → GitHub release with build attestation (unsigned — no Grafana signing step) |
 | `bundle-stats.yml` | Push / PR | Tracks frontend bundle size, comments on PRs |
 | `is-compatible.yml` | PR | Grafana API compatibility check against latest Grafana |
 | `cp-update.yml` | Monthly cron | Opens a PR with Grafana scaffolding updates |
@@ -232,9 +232,11 @@ Breakpoints set in `pkg/plugin/` will be hit when Grafana calls the plugin.
 2. Update `CHANGELOG.md`
 3. Commit and push to `main`
 4. Tag the commit: `git tag v1.x.x && git push origin v1.x.x`
-5. `release.yml` runs automatically, builds and signs the plugin, creates the GitHub release
+5. `release.yml` runs automatically, builds the plugin and creates the GitHub release
 
-The `GRAFANA_ACCESS_POLICY_TOKEN` secret must be set in the repository's GitHub Actions secrets. This token was created under the Transpara org on grafana.com with `plugin-submissions:write` scope.
+The release archive is **unsigned** — there is no signing step in CI and no Grafana access policy token anywhere in this repo. The release is published with a GitHub build attestation, which is how customers verify the archive came from this repository's CI.
+
+Customers install that archive by side-loading it (see [Distribution](#distribution)), so the version in `plugin.json` is the only thing that determines what they see in **Administration → Plugins**.
 
 ---
 
@@ -251,14 +253,29 @@ Review the diff carefully before merging — scaffolding changes can affect webp
 
 ---
 
-## Submitting to the Grafana Plugin Marketplace
+## Distribution
 
-See the [Grafana publishing docs](https://grafana.com/developers/plugin-tools/publish-a-plugin) for the full process. Summary:
+The plugin is **not published in the Grafana plugin catalog** and is **not signed**. Listing a plugin from a for-profit company in the catalog requires Grafana's Commercial Plugin Subscription (US$60,000/year), which Transpara has declined. Plugin signing is only available through that same submission flow, so the two go together: no catalog listing means no signature.
 
-1. Build the plugin: `npm run build && mage -v buildAll`
-2. Package: `cp -r dist transpara-tstore-datasource && zip -qr transpara-tstore-datasource-<version>.zip transpara-tstore-datasource && rm -rf transpara-tstore-datasource`
-3. Compute SHA1: `sha1sum transpara-tstore-datasource-<version>.zip`
-4. Upload the zip to a GitHub release
-5. Submit at `grafana.com/orgs/transpara/plugins/new` (must be admin of Transpara org)
-6. After Grafana approves, sign: `GRAFANA_ACCESS_POLICY_TOKEN=<token> npm run sign`
-7. Resubmit the signed zip
+Side-loading is therefore the only distribution path this repository supports. There is no signing script, no `GRAFANA_ACCESS_POLICY_TOKEN`, and no submission tooling — do not add any back without a decision to buy the subscription.
+
+Customers install the plugin by side-loading it into a self-hosted Grafana and adding the plugin ID to `allow_loading_unsigned_plugins`. This is a documented, supported Grafana installation path, not a workaround — Grafana provides the setting specifically so operators can run plugins they obtained outside the catalog. It also suits our customer base: most Transpara deployments are air-gapped, where catalog installs are impossible anyway.
+
+### Building a release artifact
+
+```bash
+npm run build && mage -v buildAll
+cp -r dist transpara-tstore-datasource
+zip -qr transpara-tstore-datasource-<version>.zip transpara-tstore-datasource
+rm -rf transpara-tstore-datasource
+```
+
+Attach the zip to a GitHub release (`release.yml` does this automatically on a `v*` tag). The archive's top-level directory **must** be `transpara-tstore-datasource` — it has to match the plugin `id`, or the customer's `allow_loading_unsigned_plugins` entry will not match.
+
+### Install instructions for customers
+
+End-user install steps, per-platform plugin paths, expected unsigned-plugin warnings, and upgrade steps live in [src/README.md](../src/README.md) (the README rendered on the plugin page inside Grafana). Keep that file authoritative; the repo root README links to it.
+
+### Validation
+
+CI runs `grafana/plugin-validator-cli -analyzer=metadatavalid` against the packaged archive. This is kept deliberately: it checks `plugin.json` is well-formed, and a malformed `plugin.json` breaks a side-loaded install just as surely as it would break a catalog submission.

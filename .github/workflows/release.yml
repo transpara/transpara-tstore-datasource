@@ -23,9 +23,8 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # Builds an UNSIGNED plugin archive. The plugin is distributed by side-loading,
+      # not through the Grafana catalog, so no signing step is used — see docs/development.md.
       - uses: grafana/plugin-actions/build-plugin@build-plugin/v1.0.2
         with:
-          # Grafana access policy token for signing — stored in repository secrets.
-          # Generate at: https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token
-          policy_token: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
           attestation: true
